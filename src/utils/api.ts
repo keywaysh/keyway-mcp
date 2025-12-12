@@ -260,6 +260,40 @@ export async function getVaultEnvironments(
 }
 
 /**
+ * Get a single secret value
+ */
+export async function getSecretValue(
+  repository: string,
+  environment: string,
+  key: string,
+  token: string
+): Promise<{ key: string; value: string; environment: string }> {
+  validateEnvironment(environment);
+
+  const params = new URLSearchParams({
+    repo: repository,
+    environment,
+    key,
+  });
+
+  const response = await fetchWithRetry(`${API_BASE_URL}/v1/secrets/view?${params}`, {
+    method: 'GET',
+    headers: {
+      'User-Agent': USER_AGENT,
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const result = await handleResponse<{ data?: { key: string; value: string; environment: string } }>(response);
+
+  if (!result.data || typeof result.data.value !== 'string') {
+    throw new APIError(500, 'INVALID_RESPONSE', 'Invalid response format from API');
+  }
+
+  return result.data;
+}
+
+/**
  * Valid environment name pattern
  */
 const ENVIRONMENT_PATTERN = /^[a-zA-Z][a-zA-Z0-9_-]*$/;

@@ -6,8 +6,7 @@
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { getToken } from '../utils/auth.js';
 import { getRepository } from '../utils/git.js';
-import { pullSecrets } from '../utils/api.js';
-import { parseEnvContent } from '../utils/env-parser.js';
+import { getSecretValue, APIError } from '../utils/api.js';
 
 export async function getSecret(args: {
   name: string;
@@ -17,27 +16,29 @@ export async function getSecret(args: {
   const repository = getRepository();
   const environment = args.environment || 'development';
 
-  const content = await pullSecrets(repository, environment, token);
-  const secrets = parseEnvContent(content);
+  try {
+    const result = await getSecretValue(repository, environment, args.name, token);
 
-  if (!(args.name in secrets)) {
     return {
       content: [
         {
           type: 'text',
-          text: `Secret "${args.name}" not found in environment "${environment}". Available secrets: ${Object.keys(secrets).join(', ') || '(none)'}`,
+          text: JSON.stringify({ name: result.key, value: result.value, environment: result.environment }, null, 2),
         },
       ],
-      isError: true,
     };
+  } catch (error) {
+    if (error instanceof APIError && error.statusCode === 404) {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: error.message,
+          },
+        ],
+        isError: true,
+      };
+    }
+    throw error;
   }
-
-  return {
-    content: [
-      {
-        type: 'text',
-        text: JSON.stringify({ name: args.name, value: secrets[args.name], environment }, null, 2),
-      },
-    ],
-  };
 }
