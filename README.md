@@ -10,59 +10,81 @@ MCP (Model Context Protocol) server for [Keyway](https://keyway.sh) - a GitHub-n
 - **Inject & run** - Execute commands with secrets injected as environment variables
 - **List environments** - View available environments (development, staging, production)
 
-## Installation
+## Quick Install
+
+### Claude Code
 
 ```bash
-# Clone and build
-cd keyway-mcp
-pnpm install
-pnpm build
+claude mcp add keyway npx @keywaysh/mcp
 ```
+
+### VS Code
+
+```bash
+code --add-mcp '{"name":"keyway","command":"npx","args":["-y","@keywaysh/mcp"]}'
+```
+
+Or install via one-click: [Install in VS Code](https://insiders.vscode.dev/redirect?url=vscode%3Amcp%2Finstall%3F%7B%22name%22%3A%22keyway%22%2C%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22%40keywaysh%2Fmcp%22%5D%7D)
+
+### Cursor
+
+Go to **Settings** → **MCP** → **Add new MCP Server**, then use:
+- Command: `npx`
+- Args: `-y @keywaysh/mcp`
+
+### Windsurf
+
+Add to your Windsurf MCP config:
+```json
+{
+  "mcpServers": {
+    "keyway": {
+      "command": "npx",
+      "args": ["-y", "@keywaysh/mcp"]
+    }
+  }
+}
+```
+
+### Warp
+
+**Settings** → **AI** → **Manage MCP Servers** → **Add**, then use:
+```json
+{
+  "mcpServers": {
+    "keyway": {
+      "command": "npx",
+      "args": ["-y", "@keywaysh/mcp"]
+    }
+  }
+}
+```
+
+### GitHub Copilot
+
+```bash
+/mcp add
+```
+
+Then enter `npx -y @keywaysh/mcp` when prompted.
+
+### Goose
+
+**Advanced settings** → **Extensions** → **Add custom extension**, select `STDIO` type, then use:
+- Command: `npx -y @keywaysh/mcp`
+
+---
 
 ## Prerequisites
 
 You must be logged in with the Keyway CLI:
 
 ```bash
-# Install Keyway CLI
 npm install -g @keywaysh/cli
-
-# Login
 keyway login
 ```
 
-## Usage with Claude Desktop
-
-Add to your `~/Library/Application Support/Claude/claude_desktop_config.json`:
-
-```json
-{
-  "mcpServers": {
-    "keyway": {
-      "command": "node",
-      "args": ["/path/to/keyway-mcp/dist/index.js"],
-      "cwd": "/path/to/your/project"
-    }
-  }
-}
-```
-
-Replace `/path/to/keyway-mcp` with the actual path and `/path/to/your/project` with your project directory (must be a git repo with GitHub remote).
-
-## Usage with Claude Code
-
-Add to your `~/.claude.json`:
-
-```json
-{
-  "mcpServers": {
-    "keyway": {
-      "command": "node",
-      "args": ["/path/to/keyway-mcp/dist/index.js"]
-    }
-  }
-}
-```
+---
 
 ## Available Tools
 
