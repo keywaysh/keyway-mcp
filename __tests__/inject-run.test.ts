@@ -63,8 +63,9 @@ describe('injectRun', () => {
 
     it('handles command not found', async () => {
       // Command not found throws an exception with ENOENT
-      await expect(injectRun({ command: 'nonexistent-command-xyz' }))
-        .rejects.toThrow('Failed to execute command');
+      await expect(injectRun({ command: 'nonexistent-command-xyz' })).rejects.toThrow(
+        'Failed to execute command'
+      );
     });
 
     it('handles command with non-zero exit code', async () => {

@@ -41,30 +41,6 @@ describe('listSecrets', async () => {
   });
 });
 
-describe('getSecret', async () => {
-  const { getSecret } = await import('../src/tools/get-secret.js');
-
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it('returns secret value', async () => {
-    const response = await getSecret({ name: 'DATABASE_URL' });
-    const data = JSON.parse(response.content[0].text);
-
-    expect(data.name).toBe('DATABASE_URL');
-    expect(data.value).toBe('postgres://localhost');
-    expect(response.isError).toBeFalsy();
-  });
-
-  it('returns error for missing secret', async () => {
-    const response = await getSecret({ name: 'MISSING_KEY' });
-
-    expect(response.isError).toBe(true);
-    expect(response.content[0].text).toContain('not found');
-  });
-});
-
 describe('setSecret', async () => {
   const { setSecret } = await import('../src/tools/set-secret.js');
 

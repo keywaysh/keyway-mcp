@@ -59,19 +59,33 @@ describe('Environment validation', () => {
     const { pullSecrets } = await import('../src/utils/api.js');
 
     // These should not throw validation errors (will throw fetch error instead)
-    await expect(pullSecrets('owner/repo', 'development', 'token')).rejects.toThrow('Mocked fetch failure');
-    await expect(pullSecrets('owner/repo', 'staging', 'token')).rejects.toThrow('Mocked fetch failure');
-    await expect(pullSecrets('owner/repo', 'production', 'token')).rejects.toThrow('Mocked fetch failure');
-    await expect(pullSecrets('owner/repo', 'my-env-123', 'token')).rejects.toThrow('Mocked fetch failure');
+    await expect(pullSecrets('owner/repo', 'development', 'token')).rejects.toThrow(
+      'Mocked fetch failure'
+    );
+    await expect(pullSecrets('owner/repo', 'staging', 'token')).rejects.toThrow(
+      'Mocked fetch failure'
+    );
+    await expect(pullSecrets('owner/repo', 'production', 'token')).rejects.toThrow(
+      'Mocked fetch failure'
+    );
+    await expect(pullSecrets('owner/repo', 'my-env-123', 'token')).rejects.toThrow(
+      'Mocked fetch failure'
+    );
   });
 
   it('rejects invalid environment names', async () => {
     const { pullSecrets } = await import('../src/utils/api.js');
 
     await expect(pullSecrets('owner/repo', '', 'token')).rejects.toThrow('Invalid environment');
-    await expect(pullSecrets('owner/repo', '123invalid', 'token')).rejects.toThrow('Invalid environment');
-    await expect(pullSecrets('owner/repo', 'has spaces', 'token')).rejects.toThrow('Invalid environment');
-    await expect(pullSecrets('owner/repo', 'has@special', 'token')).rejects.toThrow('Invalid environment');
+    await expect(pullSecrets('owner/repo', '123invalid', 'token')).rejects.toThrow(
+      'Invalid environment'
+    );
+    await expect(pullSecrets('owner/repo', 'has spaces', 'token')).rejects.toThrow(
+      'Invalid environment'
+    );
+    await expect(pullSecrets('owner/repo', 'has@special', 'token')).rejects.toThrow(
+      'Invalid environment'
+    );
   });
 });
 

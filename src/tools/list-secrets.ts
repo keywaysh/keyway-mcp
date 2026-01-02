@@ -9,9 +9,7 @@ import { getRepository } from '../utils/git.js';
 import { pullSecrets } from '../utils/api.js';
 import { parseEnvContent } from '../utils/env-parser.js';
 
-export async function listSecrets(args: {
-  environment?: string;
-}): Promise<CallToolResult> {
+export async function listSecrets(args: { environment?: string }): Promise<CallToolResult> {
   const token = await getToken();
   const repository = getRepository();
   const environment = args.environment || 'development';
@@ -24,7 +22,11 @@ export async function listSecrets(args: {
     content: [
       {
         type: 'text',
-        text: JSON.stringify({ repository, environment, count: keys.length, secrets: keys }, null, 2),
+        text: JSON.stringify(
+          { repository, environment, count: keys.length, secrets: keys },
+          null,
+          2
+        ),
       },
     ],
   };

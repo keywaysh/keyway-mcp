@@ -33,12 +33,7 @@ export async function setSecret(args: {
   const repository = getRepository();
   const environment = args.environment || 'development';
 
-  const result = await pushSecrets(
-    repository,
-    environment,
-    { [args.name]: args.value },
-    token
-  );
+  const result = await pushSecrets(repository, environment, { [args.name]: args.value }, token);
 
   const action = result.stats?.created ? 'created' : 'updated';
 

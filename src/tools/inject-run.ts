@@ -65,7 +65,10 @@ function truncateOutput(text: string, maxBytes: number): { text: string; truncat
 
   // Find a safe truncation point (don't cut in middle of multi-byte char)
   let truncated = text;
-  while (Buffer.byteLength(truncated, 'utf8') > maxBytes - Buffer.byteLength(TRUNCATION_MESSAGE, 'utf8')) {
+  while (
+    Buffer.byteLength(truncated, 'utf8') >
+    maxBytes - Buffer.byteLength(TRUNCATION_MESSAGE, 'utf8')
+  ) {
     truncated = truncated.slice(0, -1000); // Remove 1000 chars at a time for efficiency
   }
 

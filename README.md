@@ -1,153 +1,342 @@
+<div align="center">
+
 # Keyway MCP Server
 
-MCP (Model Context Protocol) server for [Keyway](https://keyway.sh) - a GitHub-native secrets management platform. This server allows LLMs like Claude to securely access and manage secrets without exposing them in conversation context.
+**Let AI manage your secrets securely**
 
-## Features
+[![npm version](https://img.shields.io/npm/v/@keywaysh/mcp.svg)](https://www.npmjs.com/package/@keywaysh/mcp)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-- **List secrets** - View secret names without exposing values
-- **Get secret** - Retrieve a specific secret value for programmatic use
-- **Set secret** - Create or update secrets
-- **Inject & run** - Execute commands with secrets injected as environment variables
-- **List environments** - View available environments (development, staging, production)
+[Keyway](https://keyway.sh) is a GitHub-native secrets manager. This MCP server lets AI assistants like Claude securely access your secrets **without ever exposing them in conversation**.
 
-## Quick Install
+[Installation](#quick-install) · [Tools](#available-tools) · [Security](#security) · [Development](#development)
 
-### Claude Code
-
-```bash
-claude mcp add keyway npx @keywaysh/mcp
-```
-
-### VS Code
-
-```bash
-code --add-mcp '{"name":"keyway","command":"npx","args":["-y","@keywaysh/mcp"]}'
-```
-
-Or install via one-click: [Install in VS Code](https://insiders.vscode.dev/redirect?url=vscode%3Amcp%2Finstall%3F%7B%22name%22%3A%22keyway%22%2C%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22%40keywaysh%2Fmcp%22%5D%7D)
-
-### Cursor
-
-Go to **Settings** → **MCP** → **Add new MCP Server**, then use:
-- Command: `npx`
-- Args: `-y @keywaysh/mcp`
-
-### Windsurf
-
-Add to your Windsurf MCP config:
-```json
-{
-  "mcpServers": {
-    "keyway": {
-      "command": "npx",
-      "args": ["-y", "@keywaysh/mcp"]
-    }
-  }
-}
-```
-
-### Warp
-
-**Settings** → **AI** → **Manage MCP Servers** → **Add**, then use:
-```json
-{
-  "mcpServers": {
-    "keyway": {
-      "command": "npx",
-      "args": ["-y", "@keywaysh/mcp"]
-    }
-  }
-}
-```
-
-### GitHub Copilot
-
-```bash
-/mcp add
-```
-
-Then enter `npx -y @keywaysh/mcp` when prompted.
-
-### Goose
-
-**Advanced settings** → **Extensions** → **Add custom extension**, select `STDIO` type, then use:
-- Command: `npx -y @keywaysh/mcp`
+</div>
 
 ---
 
-## Prerequisites
+## Why Keyway MCP?
 
-You must be logged in with the Keyway CLI:
+Traditional secret management with AI is risky: copying secrets into chat exposes them in logs and context. Keyway MCP solves this:
+
+| Without Keyway | With Keyway MCP |
+|----------------|-----------------|
+| Copy secrets into chat | Secrets stay in vault |
+| Visible in conversation history | Never exposed to AI |
+| Manual secret creation | Generate securely, never exposed |
+| Hope AI doesn't leak them | Cryptographically protected |
+
+**Key features:**
+- **Zero exposure** — Generate, validate, and use secrets without the AI ever seeing them
+- **Pre-deployment validation** — Check all required secrets exist before shipping
+- **Secret scanning** — Detect leaked credentials in your codebase
+- **Environment diffing** — Compare secrets across dev/staging/prod
+
+---
+
+## Quick Install
+
+### Prerequisites
+
+First, authenticate with Keyway CLI:
 
 ```bash
 npx @keywaysh/cli login
 ```
 
+### Claude Code
+
+```bash
+claude mcp add keyway -- npx @keywaysh/mcp
+```
+
+### VS Code / Cursor
+
+```bash
+code --add-mcp '{"name":"keyway","command":"npx","args":["-y","@keywaysh/mcp"]}'
+```
+
+Or click: [Install in VS Code](https://insiders.vscode.dev/redirect?url=vscode%3Amcp%2Finstall%3F%7B%22name%22%3A%22keyway%22%2C%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22%40keywaysh%2Fmcp%22%5D%7D)
+
+### Other IDEs
+
+<details>
+<summary><b>Windsurf</b></summary>
+
+Add to your MCP config:
+```json
+{
+  "mcpServers": {
+    "keyway": {
+      "command": "npx",
+      "args": ["-y", "@keywaysh/mcp"]
+    }
+  }
+}
+```
+</details>
+
+<details>
+<summary><b>Warp</b></summary>
+
+**Settings** → **AI** → **Manage MCP Servers** → **Add**:
+```json
+{
+  "mcpServers": {
+    "keyway": {
+      "command": "npx",
+      "args": ["-y", "@keywaysh/mcp"]
+    }
+  }
+}
+```
+</details>
+
+<details>
+<summary><b>GitHub Copilot</b></summary>
+
+```bash
+/mcp add
+```
+Then enter `npx -y @keywaysh/mcp` when prompted.
+</details>
+
+<details>
+<summary><b>Goose</b></summary>
+
+**Advanced settings** → **Extensions** → **Add custom extension**
+
+Select `STDIO` type, command: `npx -y @keywaysh/mcp`
+</details>
+
 ---
 
 ## Available Tools
 
-### `keyway_list_secrets`
+### `keyway_generate`
 
-List all secret names in the vault (without values).
+Generate secure secrets and store them directly in the vault. **The value is never exposed to the AI.**
+
+```
+"Generate a new JWT secret for production"
+```
 
 ```json
 {
-  "environment": "production"  // optional, default: "development"
+  "name": "JWT_SECRET",
+  "type": "jwt-secret",
+  "environment": "production"
 }
 ```
 
-### `keyway_get_secret`
+**Types:** `password` | `uuid` | `api-key` | `jwt-secret` | `hex` | `base64`
 
-Get the value of a specific secret.
+**Response:**
+```json
+{
+  "success": true,
+  "action": "created",
+  "name": "JWT_SECRET",
+  "type": "jwt-secret",
+  "length": 43,
+  "preview": "eyJh**********************************MDkz",
+  "message": "Secret created. The actual value was never exposed in this conversation."
+}
+```
+
+---
+
+### `keyway_validate`
+
+Validate required secrets exist before deployment. Supports auto-detection from code.
+
+```
+"Check if production has all required secrets"
+```
 
 ```json
 {
-  "name": "DATABASE_URL",      // required
-  "environment": "production"  // optional, default: "development"
+  "environment": "production",
+  "required": ["DATABASE_URL", "STRIPE_SECRET_KEY", "JWT_SECRET"]
 }
 ```
 
-### `keyway_set_secret`
-
-Create or update a secret.
+**Or auto-detect from your codebase:**
 
 ```json
 {
-  "name": "API_KEY",           // required, must be UPPERCASE_WITH_UNDERSCORES
-  "value": "sk-...",           // required
-  "environment": "production"  // optional, default: "development"
+  "environment": "production",
+  "autoDetect": true
 }
 ```
+
+**Response:**
+```json
+{
+  "valid": false,
+  "missing": ["STRIPE_SECRET_KEY"],
+  "present": ["DATABASE_URL", "JWT_SECRET"],
+  "stats": {
+    "requiredCount": 3,
+    "presentCount": 2,
+    "coverage": "66.7%"
+  },
+  "message": "✗ Missing 1 required secret in production: STRIPE_SECRET_KEY"
+}
+```
+
+---
+
+### `keyway_scan`
+
+Scan your codebase for leaked secrets. Detects 18+ secret types.
+
+```
+"Scan the codebase for leaked credentials"
+```
+
+```json
+{
+  "path": "./src"
+}
+```
+
+**Detects:** AWS keys, GitHub tokens, Stripe keys, Slack webhooks, private keys, and more.
+
+**Response:**
+```json
+{
+  "filesScanned": 142,
+  "findingsCount": 2,
+  "findings": [
+    {
+      "file": "src/config.ts",
+      "line": 23,
+      "type": "GitHub PAT",
+      "preview": "ghp_********************************xyz"
+    }
+  ]
+}
+```
+
+---
+
+### `keyway_diff`
+
+Compare secrets between environments.
+
+```
+"What's different between staging and production?"
+```
+
+```json
+{
+  "env1": "staging",
+  "env2": "production"
+}
+```
+
+**Response:**
+```json
+{
+  "onlyInEnv1": ["DEBUG_MODE"],
+  "onlyInEnv2": ["REDIS_CLUSTER_URL"],
+  "different": [
+    {
+      "key": "DATABASE_URL",
+      "preview1": "**st (45 chars)",
+      "preview2": "**db (52 chars)"
+    }
+  ],
+  "same": ["API_KEY", "JWT_SECRET"],
+  "stats": {
+    "totalEnv1": 10,
+    "totalEnv2": 11,
+    "different": 1
+  }
+}
+```
+
+---
 
 ### `keyway_inject_run`
 
-Run a command with secrets injected as environment variables.
+Run commands with secrets injected as environment variables.
+
+```
+"Run the test suite with production secrets"
+```
 
 ```json
 {
-  "command": "npm",            // required
-  "args": ["run", "dev"],      // optional
-  "environment": "development", // optional, default: "development"
-  "timeout": 300000            // optional, default: 5 minutes
+  "command": "npm",
+  "args": ["test"],
+  "environment": "production"
 }
 ```
+
+Secrets are injected into the command's environment and **masked in any output**.
+
+---
+
+### `keyway_list_secrets`
+
+List secret names (not values) in an environment.
+
+```json
+{
+  "environment": "production"
+}
+```
+
+---
+
+### `keyway_set_secret`
+
+Create or update a secret manually.
+
+```json
+{
+  "name": "WEBHOOK_URL",
+  "value": "https://hooks.example.com/abc123",
+  "environment": "production"
+}
+```
+
+---
 
 ### `keyway_list_environments`
 
 List available environments for the repository.
 
-```json
-{}
-```
+---
 
 ## Security
 
-- **Token reuse**: Uses the same encrypted token storage as the Keyway CLI (`~/.keyway/.key`)
-- **No logging**: Secret values are never logged
-- **Output masking**: The `inject_run` tool masks secret values in command output
-- **Shell injection prevention**: Commands run with `shell: false`
-- **Name validation**: Secret names must be uppercase with underscores
+Keyway MCP is designed with security as the primary concern:
+
+| Feature | How it works |
+|---------|--------------|
+| **Token encryption** | Uses AES-256-GCM, same as Keyway CLI |
+| **No secret logging** | Values never appear in logs or output |
+| **Output masking** | `inject_run` redacts secrets from stdout/stderr |
+| **Shell injection prevention** | Commands run with `shell: false` |
+| **File permissions** | Validates `~/.keyway/.key` is `0600` |
+| **Generate, don't expose** | `keyway_generate` creates secrets without revealing them |
+
+### What the AI can see
+
+| Tool | AI sees value? |
+|------|----------------|
+| `keyway_generate` | No — only masked preview |
+| `keyway_validate` | No — only key names |
+| `keyway_scan` | No — only masked previews |
+| `keyway_diff` | No — only masked previews |
+| `keyway_inject_run` | No — values masked in output |
+| `keyway_list_secrets` | No — only key names |
+| `keyway_set_secret` | Yes — value provided by user |
+
+---
 
 ## Development
 
@@ -163,12 +352,28 @@ pnpm build
 
 # Run tests
 pnpm test
+
+# Lint & format
+pnpm lint
+pnpm format
 ```
 
-## Environment Variables
+### Environment Variables
 
-- `KEYWAY_API_URL` - Override API URL (default: https://api.keyway.sh)
+| Variable | Description |
+|----------|-------------|
+| `KEYWAY_API_URL` | Override API URL (default: `https://api.keyway.sh`) |
+
+---
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE)
+
+---
+
+<div align="center">
+
+**[keyway.sh](https://keyway.sh)** · Built for developers who care about security
+
+</div>

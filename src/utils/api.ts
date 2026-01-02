@@ -25,9 +25,7 @@ function validateApiUrl(url: string): void {
       parsed.hostname === '0.0.0.0';
 
     if (!isLocalhost) {
-      throw new Error(
-        `Insecure API URL: ${url}. HTTPS is required for non-localhost URLs.`
-      );
+      throw new Error(`Insecure API URL: ${url}. HTTPS is required for non-localhost URLs.`);
     }
   }
 }
@@ -232,14 +230,15 @@ export async function pushSecrets(
 /**
  * Get vault environments
  */
-export async function getVaultEnvironments(
-  repository: string,
-  token: string
-): Promise<string[]> {
+export async function getVaultEnvironments(repository: string, token: string): Promise<string[]> {
   const [owner, repo] = repository.split('/');
 
   if (!owner || !repo) {
-    throw new APIError(400, 'INVALID_REPOSITORY', 'Invalid repository format. Expected "owner/repo"');
+    throw new APIError(
+      400,
+      'INVALID_REPOSITORY',
+      'Invalid repository format. Expected "owner/repo"'
+    );
   }
 
   const response = await fetchWithRetry(
@@ -284,7 +283,9 @@ export async function getSecretValue(
     },
   });
 
-  const result = await handleResponse<{ data?: { key: string; value: string; environment: string } }>(response);
+  const result = await handleResponse<{
+    data?: { key: string; value: string; environment: string };
+  }>(response);
 
   if (!result.data || typeof result.data.value !== 'string') {
     throw new APIError(500, 'INVALID_RESPONSE', 'Invalid response format from API');
