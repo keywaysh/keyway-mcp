@@ -13,20 +13,52 @@ const RETRY_DELAY_MS = 1000;
 validateApiUrl(API_BASE_URL);
 
 /**
- * Validate API URL - enforce HTTPS for non-localhost
+ * Check if URL is a private/internal network
+ */
+function isPrivateNetwork(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    const hostname = parsed.hostname;
+
+    // Localhost
+    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' || hostname === '0.0.0.0') {
+      return true;
+    }
+
+    // Private IP ranges
+    if (/^10\./.test(hostname) || /^172\.(1[6-9]|2\d|3[01])\./.test(hostname) || /^192\.168\./.test(hostname)) {
+      return true;
+    }
+
+    // .local domains (mDNS)
+    if (hostname.endsWith('.local')) {
+      return true;
+    }
+
+    // .internal domains
+    if (hostname.endsWith('.internal')) {
+      return true;
+    }
+
+    // Single-label hostnames without dots (e.g., Docker service names like "api")
+    if (!hostname.includes('.')) {
+      return true;
+    }
+
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Validate API URL - enforce HTTPS for non-private networks
  */
 function validateApiUrl(url: string): void {
   const parsed = new URL(url);
 
-  if (parsed.protocol !== 'https:') {
-    const isLocalhost =
-      parsed.hostname === 'localhost' ||
-      parsed.hostname === '127.0.0.1' ||
-      parsed.hostname === '0.0.0.0';
-
-    if (!isLocalhost) {
-      throw new Error(`Insecure API URL: ${url}. HTTPS is required for non-localhost URLs.`);
-    }
+  if (parsed.protocol !== 'https:' && !isPrivateNetwork(url)) {
+    throw new Error(`Insecure API URL: ${url}. HTTPS is required for non-private network URLs.`);
   }
 }
 
