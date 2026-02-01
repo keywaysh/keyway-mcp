@@ -21,12 +21,21 @@ function isPrivateNetwork(url: string): boolean {
     const hostname = parsed.hostname;
 
     // Localhost
-    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' || hostname === '0.0.0.0') {
+    if (
+      hostname === 'localhost' ||
+      hostname === '127.0.0.1' ||
+      hostname === '::1' ||
+      hostname === '0.0.0.0'
+    ) {
       return true;
     }
 
     // Private IP ranges
-    if (/^10\./.test(hostname) || /^172\.(1[6-9]|2\d|3[01])\./.test(hostname) || /^192\.168\./.test(hostname)) {
+    if (
+      /^10\./.test(hostname) ||
+      /^172\.(1[6-9]|2\d|3[01])\./.test(hostname) ||
+      /^192\.168\./.test(hostname)
+    ) {
       return true;
     }
 

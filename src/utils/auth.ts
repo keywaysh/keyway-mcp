@@ -32,9 +32,7 @@ const KEY_FILE = join(KEY_DIR, '.key');
  */
 function getEncryptionKey(): Buffer {
   if (!existsSync(KEY_FILE)) {
-    throw new Error(
-      `Encryption key not found at ${KEY_FILE}. Run "keyway login" to authenticate.`
-    );
+    throw new Error(`Encryption key not found at ${KEY_FILE}. Run "keyway login" to authenticate.`);
   }
 
   // Validate file permissions on Unix systems (not Windows)
@@ -111,9 +109,7 @@ export async function getStoredAuth(): Promise<StoredAuth> {
   try {
     auth = JSON.parse(decrypted) as StoredAuth;
   } catch {
-    throw new Error(
-      'Stored token is corrupted. Run "keyway logout && keyway login" to reset.'
-    );
+    throw new Error('Stored token is corrupted. Run "keyway logout && keyway login" to reset.');
   }
 
   if (isExpired(auth)) {
