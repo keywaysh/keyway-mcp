@@ -32,9 +32,7 @@ const KEY_FILE = join(KEY_DIR, '.key');
  */
 function getEncryptionKey(): Buffer {
   if (!existsSync(KEY_FILE)) {
-    throw new Error(
-      `Encryption key not found at ${KEY_FILE}. Run "npx @keywaysh/cli login" to authenticate.`
-    );
+    throw new Error(`Encryption key not found at ${KEY_FILE}. Run "keyway login" to authenticate.`);
   }
 
   // Validate file permissions on Unix systems (not Windows)
@@ -54,7 +52,7 @@ function getEncryptionKey(): Buffer {
   if (keyHex.length !== 64) {
     throw new Error(
       `Encryption key file is corrupted (invalid length). ` +
-        `Run "npx @keywaysh/cli logout && npx @keywaysh/cli login" to reset.`
+        `Run "keyway logout && keyway login" to reset.`
     );
   }
 
@@ -67,7 +65,7 @@ function decryptToken(encryptedData: string): string {
   const parts = encryptedData.split(':');
   if (parts.length !== 3) {
     throw new Error(
-      'Stored token format is invalid. Run "npx @keywaysh/cli logout && npx @keywaysh/cli login" to reset.'
+      'Stored token format is invalid. Run "keyway logout && keyway login" to reset.'
     );
   }
 
@@ -83,7 +81,7 @@ function decryptToken(encryptedData: string): string {
     return decrypted.toString('utf8');
   } catch {
     throw new Error(
-      'Failed to decrypt stored token. Run "npx @keywaysh/cli logout && npx @keywaysh/cli login" to reset.'
+      'Failed to decrypt stored token. Run "keyway logout && keyway login" to reset.'
     );
   }
 }
@@ -102,7 +100,7 @@ function isExpired(auth: StoredAuth): boolean {
 export async function getStoredAuth(): Promise<StoredAuth> {
   const encryptedData = store.get('auth');
   if (!encryptedData) {
-    throw new Error('Not logged in. Run "npx @keywaysh/cli login" to authenticate.');
+    throw new Error('Not logged in. Run "keyway login" to authenticate.');
   }
 
   const decrypted = decryptToken(encryptedData);
@@ -111,13 +109,11 @@ export async function getStoredAuth(): Promise<StoredAuth> {
   try {
     auth = JSON.parse(decrypted) as StoredAuth;
   } catch {
-    throw new Error(
-      'Stored token is corrupted. Run "npx @keywaysh/cli logout && npx @keywaysh/cli login" to reset.'
-    );
+    throw new Error('Stored token is corrupted. Run "keyway logout && keyway login" to reset.');
   }
 
   if (isExpired(auth)) {
-    throw new Error('Session expired. Run "npx @keywaysh/cli login" to re-authenticate.');
+    throw new Error('Session expired. Run "keyway login" to re-authenticate.');
   }
 
   return auth;
